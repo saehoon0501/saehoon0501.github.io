@@ -457,7 +457,19 @@ cat -n /var/log/auth.log | grep -ai "authentication failure" > auth.txt     # =>
 file을 찾는 관련 명령어로는 locate과 which가 존재한다.
 Ubuntu에서는 locate을 위해 mlocate를 apt를 통해 설치해야 한다.
 
-- find는 실시간으로 모든 파일들을 찾으며, 다양한 옵션들을 제공한다.
+- find는 실시간으로 모든 파일들을 찾으며, 다양한 옵션들을 제공한다. 따라서 파일명 뿐만아니라 owner, permission을 대상으로 파일을 찾을 수 있다.  
+  -name으로 파일명을 찾을 수 있으며, -iname을 통해 case-insensitive하게 파일명을 검색 가능하다.
+  -delete를 통해 찾은 파일을 삭제할 수 있다.  
+  -ls를 통해 찾은 파일에 대한 ls를 수행한 결과를 받아 볼 수 있다.
+  -type을 통해 찾은 결과 중 해당 type에 해당하는 결과만 받아 볼 수 있다.  
+  -maxdepth 옵션을 통해 결과를 찾는 검색 내용의 최대 depth를 설정할 수 있다.  
+  -perm을 통해 결과에서 특정 permission에 해당하는 파일만 가져올 수 있다.  
+  -size를 통해 결과에서 특정 크기에 해당하는 파일만 가져올 수 있으며, 이러한 크기 범위 또한 +숫자와 -숫자를 통해 지정할 수 있다.  
+  -atime/mtime/ctime 옵션을 통해 특정 timestamp에 해당하는 결과만 가져올 수 있다.
+  -user를 통해 결과에서 특정 owner에 해당하는 파일만 가져올 수 있다.
+  -not을 통해 나열한 조건에 대한 negation 결과를 가져올 수 있다.
+  -exec을 통해 찾은 파일에 대해 원하는 command를 수행할 수 있다. ex) sudo find /etc -type f -mtime 0 -exec cat {} \; {}에는 찾은 파일명이 들어가게 된다. 그리고 \;을 통해 command가 끝난다는 것을 알려준다.
+  -ok는 exec와 같은 기능을 수행하지만 모든 결과에 대한 작업 허가 prompt를 출력해준다.
 - locate은 이름을 찾아 해당 이름을 포함하는 path 리스트를 리턴한다. 이는 이전에 빌드된 DB를 이용한다. locate을 위한 DB를 새로 빌드하기 위해서는 sudo updatedb를 입력하면 되며 주기적으로 업데이트 해줘야 locate을 통해 파일을 찾을 수 있다.  
   기본적으로 absolute path 전체를 보지만 -b를 통해 파일 basename만을 보고 결과를 가져올 수 있다.
   포함이 아닌 정확히 일치하는 결과만 가져오고 싶다면 \을 이름앞에 사용 후 ''로 감싼다.
@@ -507,4 +519,161 @@ find PATH OPTIONS
 # -atime n, -mtime n, ctime n
 # -user owner
 # -group group_owner
+```
+
+## Searching for String Pattern in text files
+
+grep을 통해 원하는 keyword를 text파일에서 찾을 수 있으며, pipe와 함께 매우매우 자주 사용되는 명령어이다.  
+ex) grep "SSH" /etc/ssh/ssh_config
+
+-i 옵션을 통해 case-insensitive하게 keyword를 찾을 수 있다.  
+-n 옵션을 통해 찾은 결과에 대한 n번째 줄에 대한 정보를 출력한다.  
+-w 옵션을 통해 단어와 정확히 일치하는 결과만을 가져올 수 있다.
+-v 옵션을 통해 기존 결과를 invert한 결과를 가져올 수 있다.
+-a 옵션을 통해 binary 파일에 대한 keyword를 검색한 결과를 가져올 수 있다.  
+-r 옵션을 통해 하위 dir들까지 검색한 결과를 가져올 수 있다.
+
+추가적으로 string 명령어를 통해 바이너리 파일에 있는 문자를 출력할 수 있다.
+
+```shell
+grep [OPTIONS] pattern file
+
+Options:
+-n          # => print line number
+-i          # => case insensitive
+-v          # inverse the match
+-w          # search for whole words
+-a          # search in binary files
+-R          # search in directory recursively
+-c          # display only the no. of matches
+-C n        # display a context (n lines before and after the match)
+
+
+# printing ASCII chars from a binary file
+strings binary_file
+```
+
+## Comparing Files
+
+명령어의 서로 다른 2개의 output을 비교하거나 config 파일을 비교하는 등 유용하게 쓰이는 명령어들이 존재한다.
+
+- cmp 명령어를 통해 두 개의 파일(바이너리 포함)을 비교할 수 있다. Byte별로 비교하여 처음으로 다른 부분을 출력한다.  
+  만약 동일하다면 아무런 출력을 하지 않는다.
+- sha256 명령어를 통해 두 명령어의 hash 값을 비교해 동일한지 알 수 있다.
+- diff 명령어를 통해 text 파일간 줄별 비교결과를 가져올 수 있다. -B 옵션을 통해 빈 줄을 -w를 통해 빈 칸을 -i를 통해 대소문자 다른점 무시를 할 수 있다.
+  만약 두 파일을 양쪽에 띄워 비교하고 싶다면 -y 옵션을 사용한다.
+- patch 명령어를 통해 diff의 결과를 기존 오리지널 파일에 적용하여 수정을 가할 수 있다.
+
+## VIM Text Editor
+
+많은 Linux에서 기본적으로 사용하는 VIM에 대해서 알아보자.
+
+VIM에서는 3가지 기본 모드가 존재한다.
+
+- command: 입력하는 문자들이 명령어로 인식된다.
+- insert: i(또는 l,a,A,o,O)를 눌러 text를 수정할 수 있는 모드로 들어갈 수 있다.
+- last line: :문자를 입력하면 들어가는 모드로 맨 마지막 줄로 커서가 이동한다. 이를 통해 vim을 나가거나 파일을 저장할 수 있다.
+
+```shell
+Modes of operation: Command, Insert, and Last Line Modes.
+VIM Config File: ~/.vimrc
+
+# Entering the Insert Mode from the Command Mode
+i  => insert before the cursor
+I  => insert at the beginning of the line
+a  => insert after the cursor
+A  => insert at the end of the line
+o  => insert on the next line
+
+# Entering the Last Line Mode from the Command Mode
+:
+
+# Returning to Command Mode from Insert or Last Line Mode
+ESC
+
+# Shortcuts in Last Line Mode
+w!  => write/save the file
+q!  => quit the file without saving
+wq! => save/write and quit
+e!  => undo to the last saved version of the file
+set nu => set line numbers
+set nonu  => unset line numbers
+syntax on|off
+%s/search_string/replace_string/g
+
+# Shortcuts in Command Mode
+x   => remove char under the cursor
+dd  => cut the current line
+5dd => cut 5 lines
+ZZ  => save and quit
+u   => undo
+G   => move to the end of file
+$   => move to the end of line
+0 or ^  => move to the beginning of file
+:n (Ex :10) => move to line n
+Shift+v     => select the current line
+y           => yank/copy to clipboard
+p           => paste after the cursor
+P           => paste before the cursor
+/string     => search for string forward
+?string     => search for string backward
+n           => next occurrence
+N           => previous occurrence
+
+# Opening more files in stacked windows
+vim -o file1 file2
+
+# Opening more files and highlighting the differences
+vim -d file1 file2
+Ctrl+w => move between files
+```
+
+home dir에 .vimrc파일을 vim을 통해 vim에 대한 config파일을 작성할 수 있다.
+만약 vim 실행을 비정상적으로 종료하면 swp파일을 통해 복구 가능하며 이를 원하지 않을 시 swp파일을 삭제한다.
+
+## Compressing and Archiving Files
+
+Compressing: 파일 압축(크기 감소)
+Archiving: 파일 모음(크기 동일)
+
+명령어 tar를 통해 Archiving과 Compressing을 둘 다 수행할 수 있다.
+
+- c 옵션을 통해 archive를 생성한다.
+- z 옵션을 통해 gzip을 같이 이용해 압축과 archive를 둘다 수행한다.
+- f 옵션을 통해 tar을 수행하는 대상 또는 결과의 archive명을 정할 수 있다.
+- v 옵션을 통해 수행에 포함되는 파일들을 출력한 결과를 확인할 수 있다.
+- j 옵션을 통해 압축에 gzip 대신 bz2을 사용할 수 있다.
+- --exclude 옵션을 통해 특정 파일 이름들은 수행에서 제외할 수 있다.
+- x 옵션을 통해 archive에서 파일들을 추출할 수 있다. 추출의 경우 압축에 사용된 프로그램을 알맞게 명시하지 않으면 에러 발생한다. 아예 명시하지 않으면 알아서 알맞는 것을 사용한다.
+
+Linux에서 작업하면서 config파일들이 저장되는 /etc/ dir을 백업하는 경우가 많다.  
+그리고 이러한 백업을 수행하는 날짜를 이름에 포함하는 경우가 많으며 이 때 사용하는 명령어는 다음과 같다.
+
+```shell
+tar -cjvf etc-$(date +%F).tar.bz2 /etc/
+```
+
+## Hard Links and the inode Structure
+
+Linux에서 dir은 table로 구성되며, 한쪽은 파일명 그리고 다른 쪽은 이와 매치되는 inode 번호를 가진다. 그리고 Linux의 모든 파일마다 연관된 index node(inode)를 가진다.  
+inode는 파일의 Type,Permission,Owner,Group 등등의 metadata를 가지며 실제 파일의 내용과 이름을 제외한 모든 것을 포함한다.
+각 inode는 고유한 식별자를 정수로 가지며 이는 ls - i를 통해 확인 가능하다.
+
+inode number는 실제 파일구조와 이름을 연결하는 hard link로, 이를 통해 하나의 파일이 여러 파일명과 연결될 수 있다.
+inode number는 다른 dir path에 있는 파일명과 매치될 수 없다.
+
+### Symbolic links and Hard links
+
+- Hard link: inode와 파일 이름의 연관 관계를 나타낸다. dir에 대해서는 생성 불가능
+- Symbolic Link: 다른 파일이나 dir path에 대한 reference를 가지는 파일 타입이다. 따라서 reference 대상이 되는 파일의 위치가 변경되면 symlink는 작동하지 않는다.
+
+```shell
+#현재 dir에서 inode 번호와 매치되는 파일명들을 출력한다.
+find . -inum number
+
+#/usr dir에 있는 파일 중 hard link가 1개 이상인 파일들을 출력한다.
+find /usr/ -type f -links +1
+
+#pswd 이름으로 etc/passwd 파일에 대한 symlink 생성
+ln -s /etc/passwd ./pswd
 ```
