@@ -2,7 +2,7 @@
 title: User Account Management
 date: 2023-10-17 7:30:00 +/-0
 categories: [linux]
-tags: [linux_file_system] # TAG names should always be lowercase
+tags: [linux_user_account] # TAG names should always be lowercase
 ---
 
 ## passwd & shadow
