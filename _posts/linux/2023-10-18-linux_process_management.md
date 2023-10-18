@@ -144,7 +144,7 @@ background를 foreground로 가져오려면 명령어 fg와 %job_id를 입력하
 만약 foreground에 가져온 후 수행을 멈추고 싶다면, ctrl+z를 누른다.  
 그리고 재개하고 싶다면, bg %job_id 명령어를 입력한다.
 
-foreground의 경우 작업을 수행시킨 후 terminal을 닫으면, hup signal이 보내져 작업이 중단된다. 만약 이를 원하지 않는다면, nohup 명령어 맨 앞에 추가한다.  
+foreground/background 모두 작업을 수행시킨 후 terminal을 닫으면, parent process가 사라졌기에 hup signal이 보내져 작업이 중단된다. 만약 이를 원하지 않는다면, nohup 명령어 맨 앞에 추가한다.  
 nohup 사용 시 그 수행 결과는 nohup.out 파일에 저장되게 되며, 만약 현재 dir에 권한이 없으면 user의 home dir에 저장되게 된다.
 
 ## Commands
