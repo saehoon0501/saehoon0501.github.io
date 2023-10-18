@@ -38,7 +38,7 @@ order: 4
 
 ---
 
-[스마또봇](https://github.com/saehoon0501/OpenBot) | Start Date - End Date
+[스마또봇](https://github.com/saehoon0501/OpenBot) | 2021/09 - 2021/12
 
 - Overview  
   아두이노와 스마트폰을 활용한 로봇
