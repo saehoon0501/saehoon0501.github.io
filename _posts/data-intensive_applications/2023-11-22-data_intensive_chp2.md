@@ -20,11 +20,11 @@ data model은 소프트웨어가 어떻게 구성될 것인가 뿐 아니라 해
 각 data model마다 특징을 가지며, 이에 따라 작업을 수행하는 방식도 달라지게 된다.  
 대표적인 data model인 relational, document, graph model들과 이들만의 query 방식에 대해서 알아보자.
 
-# Relational Model vs Document Model
+## Relational Model vs Document Model
 
 초기 대부분의 usecase들은 transaction processing(계좌 이체, 비행기 예약, 재산관리 등)과 batch processing(급여, 레포트 처리 등)에 기반하여 사용되었지만 이에 국한되지 않고 다른 문제들까지 generalize를 잘 하였기에 가장 많이 사용된다.
 
-## The Birth of NoSQL
+### The Birth of NoSQL
 
 NoSQL은 Not Only SQL의 약자로 통용되며, RDB를 대체하려는 시도에 의해 탄생하게 되었다.  
 NoSQL DB를 사용하고자 하는 가장 큰 이유들은 아래와 같다.
@@ -33,7 +33,7 @@ NoSQL DB를 사용하고자 하는 가장 큰 이유들은 아래와 같다.
 - relation model에서 지원하지 않은 특정 query 작업들을 수행하기 위해
 - relational schema의 제약을 피하고 더욱 변화하기 쉬운 data model을 표현하기 위해
 
-## The Object-Relational Mismatch
+### The Object-Relational Mismatch
 
 대부분의 개발 언어는 OOP를 사용하며 여기에 SQL data model을 사용할 때 항상 따라오는 serialization 비판이 있다.  
 OOP에서 사용하는 객체 data model과 relation의 table, row, column의 data model에는 서로 갭이 존재하기에 이를 맞춰주는 코드가 따로 많이 필요하며 이를 위한 라이브러리가 따로 존재한다.
@@ -49,7 +49,7 @@ OOP에서 사용하는 객체 data model과 relation의 table, row, column의 da
 JSON model의 경우 locality를 table보다 더 가지는 이점이 있다. table의 경우 이력서를 정보를 가져오기 위해 여러 query들을 수행하여야 한다. 하지만 JSON의 경우 document에 관련 정보를 모두 가지기에 하나의 query만으로도 충분하다.  
 일대다 관계에서 relational의 경우 tree 구조를 내재적(implict)으로 나타나며, JSON의 경우 직접적(explicit)으로 나타낸다.
 
-## Many-to-One and Many-to-Many Relationships
+### Many-to-One and Many-to-Many Relationships
 
 Figure 2-1에서 region_id와 industry_id가 text 형식이 아닌 표준화된 id 형태로 주어지는 이유는 다음과 같다.
 
@@ -73,14 +73,14 @@ DB에서 이러한 중복성을 없애는 것을 정규화(normalization)이라 
 
 ![Desktop View](../../assets/data_intensive_apps/fig2-4.png)
 
-## Are Document Databases Repeating History?
+### Are Document Databases Repeating History?
 
 DB에서 관계를 표현하는 가장 최고의 방법은 무엇인가에 대한 논쟁은 초기부터 이어져 왔다.  
 초기 IBM에서 개발한 IMS는 hierarchical model을 통해 data를 표현하였으며, document DB에서 사용하는 JSON과 매우 유사하다. 따라서 일대다 관계를 표현하는데 좋았고 JOIN이 없기에 다대다 관계를 표현하는데 문제를 겪었다. 따라 개발자들은 비정규화를 통해 data를 중복하여 저장할지 아니면 직접 여러 정보의 reference를 해결할지 정해야 했다.
 
 이러한 IMS의 한계를 극복하기 위해 relational model이나 network model 등이 제안되었고 관계를 표현하는 최고의 방법을 찾는 문제에 대한 논의는 현재까지 이어지고 있다.
 
-### The network model
+#### The network model
 
 CODASYL model로 불리기도 하는 이 network model은 기존 hierarhical model의 일반화이다. 즉, tree 구조에서는 record가 하나의 부모만을 가졌지만, network model에서는 graph처럼 여러 부모를 가지고 있다.  
 따라서 이를 통해 다대다 관계를 좀더 잘 표현할 수 있게 된 것이다.
@@ -93,7 +93,7 @@ record의 연결은 외래키와 같은 방식이 아닌 c언어의 포인터와
 
 이러한 path를 따라가는 query의 작동 방식은 약간의 변화에도 취약하여 유연하지 못하다. 왜냐하면 query를 위해 작성한 code가 현재 구성된 access path들을 가정한 상태로 동작하고 있기 때문이다.
 
-### The relational model
+#### The relational model
 
 반면 relational model의 경우에는 복잡하게 중첩된 구조 대신 data들을 그저 table(행과 열)로 표현하여 access path를 따라가지 않고도 원하는 data를 찾을 수 있다. 특정 열의 값을 key로 원하는 row에 저장된 record에 접근할 수 있으며, 다른 table과의 외래키 관계를 고려하지 않고 단순히 새로운 data를 table에 추가 가능하다.
 
@@ -102,18 +102,18 @@ relational model에서는 query optimizer가 자동적으로 query의 작동 순
 
 relational model에서 작동하는 query optimizer는 처음 개발할 땐 매우 복잡한 연구가 필요했지만, 한번 생성한 후에는 추후 어떠한 변화에도 활용할 수 있는 general-purpose solution이기에 장기적으로 봤을 때 매우 효율적이다.
 
-### Comparison to document databases
+#### Comparison to document databases
 
 Document model의 경우 중첩된 record들을 그들의 부모에게 저장하는 방식이기에 어찌보면 이전 hierarchical model로 다시 회기한 것이다.
 
 하지만 다대일 그리고 다대다 관계를 표현하는 방식을 보면, relational model과 그리 다르지 않다. 둘다 고유한 식별자를 통해 관련된 record를 찾으며, 이 과정에서 JOIN 또는 후속 query들을 활용한다.
 
-## Relational Versus Document Databases Today
+### Relational Versus Document Databases Today
 
 Document model의 경우 schema가 유연하고, locality를 활용한 더 좋은 성능 그리고 app에서 사용하는 data 구조와 유사하다.  
 Relational model의 경우 JOIN을 통한 다대일 그리고 다대다 관계를 더 잘 표현할 수 있다.
 
-### Which data model leads to simpler application code?
+#### Which data model leads to simpler application code?
 
 만약 일대다 관계(tree 구조)의 data를 다룰 경우 document model이 더 알맞다.  
 relational의 경우 document와 유사한 구조의 data들을 여러 table들로 나누기에 schema와 app의 코드를 복잡하게 만든다.
@@ -122,7 +122,7 @@ relational의 경우 document와 유사한 구조의 data들을 여러 table들�
 
 모든 data들에 적합한 model을 딱 말하는 것은 불가능하기에 여러 주어진 조건에 알맞은 model을 고려하여 선택할 줄 알아야 한다. 예를 들어 만약 data가 서로 얽혀있는 경우 graph model이 최고이고, relational model은 사용할만 하지만 document의 경우 부적절하다.
 
-### Schema flexibility in the document model
+#### Schema flexibility in the document model
 
 schema가 없다는 뜻은 임의의 key와 value가 document에 추가될 수 있으며, document에 어떤 field가 포함될지 보장할 수 없다는 의미이다.  
 정확히 말하면 document model은 schema가 내재적으로 존재하며 이는 강제되지 않지만 read 과정(schema-on-read)에서 특정 형태의 schema를 가정하여 진행된다는 뜻이다. 반면에 relational model의 경우 schema가 write 과정(schema-on-write)에서 가정되어 db에서 특정 schema 형태를 data에 강제한다.
@@ -134,7 +134,7 @@ data가 외부 시스템에 의해 정해지거나 다양한 type의 객체가 �
 
 하지만 만약에 data가 모두 같은 구조로 존재해야한다면 schema-on-write이 유용하다.
 
-### Data locality for queries
+#### Data locality for queries
 
 document의 경우 binary나 JSON 등으로 encode되며 하나의 연속된 string으로 저장된다.  
 따라서 data들이 모두 한곳에 뭉쳐있기에 locality(지역성)의 장점을 활용하여 빠르게 data를 가져올 수 있다.  
@@ -142,12 +142,12 @@ document의 경우 binary나 JSON 등으로 encode되며 하나의 연속된 str
 
 몇몇 RDB에서도 이러한 locality를 적용한 경우가 존재하며, 대표적으로 google의 spanner db의 경우 table schema가 부모 table의 row내에 중첩될 수 있게 허용하여 이를 적용하였다.
 
-### Convergence of document and relational databases
+#### Convergence of document and relational databases
 
 RDB에서는 JSON/XML 형태를 지원하며 반대로 document DB에서는 JOIN과 같은 query를 수행할 수 있게 하였다.  
 결과적으로 양쪽 DB가 자신의 단점을 보완하는 과정에서 유사해지고 있으며 이 둘의 hybrid 형태가 미래의 DB가 되지 않을까 예상한다.
 
-# Query Languages for Data
+## Query Languages for Data
 
 SQL declarative query language이며, document model의 경우 imperative query language이다.  
 imperative의 경우 자신의 원하는 결과를 얻기 위해 필요한 작업을 명령하는 방식이고, declarative의 경우 자신의 원하는 결과를 직접적으로 명시하는 방식이다.
@@ -160,11 +160,193 @@ document DB인 MongoDB에서는 이러한 declarative query를 위해 aggregate 
 
 web의 경우 javascript를 통해 style을 바꾸는 것보다 CSS를 통해 이를 수정하는 것이 더 효율적인 이유도 이와 같은 이유이다.
 
-## MapReduce Querying
+### MapReduce Querying
 
 MapReduce란 많은 양의 data에 대한 특정 처리 과정(pipeline과 같이)을 분산된 장치 전역에서 수행하는 programming model이며 document db에서 이를 지원한다. imperative와 declarative를 결합한 형태를 가진다.
 
 원하는 data 형태를 나타내는 부분과 적업을 수행하기 위한 함수인 map과 reduce로 이뤄져 있으며, 이 두 함수 모두 pure function이여야 한다. 즉, 함수에 arg으로 들어온 data만 다룰 수 있고 side effect를 가지면 안되고 이외 추가적인 query를 수행할 수 없다.  
 이러한 제약조건을 통해 DB에서 함수를 어떤 조건이나 순서에 상관없이 언제든 수행 또는 재수행할 수 있다. 그리고 제약조건이 존재하지만 여전히 라이브러리 함수를 호출하거나 연산 등을 수행할 수 있기에 강력한 도구이다.
 
+MongoDB에서 mapReduce
+
+```javascript
+db.observations.mapReduce(
+  function map() {
+    let year = this.observationTimestamp.getFullYear();
+    let month = this.observationTimestamp.getMonth() + 1;
+    emit(`${year}-${month}`, this.numAnimals);
+  },
+  function reduce(key, values) {
+    return Array.sum(values);
+  },
+  {
+    query: { family: "Sharks" },
+    out: "monthlySharkReport",
+  }
+);
+```
+
 MapReduce는 SQL에서도 구현될 수 있지만 많은 SQL에서 지원하고 있진 않다.
+
+## Graph-Like Data Models
+
+일대다 관계 또는 관계가 존재하지 않는 data라면 document model이 적절하다.  
+하지만 만약 다대다 관계가 많고 매우 복잡한 data라면 graph model이 가장 적절할 것이다.
+
+Graph model은 단순히 homogeneous한 data 뿐 아니라 여러 type의 객체들로 이뤄진 data에서도 활용될 수 있다. 이때 각 vertices와 edge들은 각각 다른 관계 또는 객체를 의미하게 된다.  
+예를 들어 facebook에서는 graph를 통해 사람,장소,이벤트, 댓글 등 여러 객체들과 이들의 관계를 표현하였다.
+
+아래 Fig 2-5 또한 graph model를 나타낸다.
+
+![Desktop View](../../assets/data_intensive_apps/fig2-5.png)
+
+graph model 중 property graph와 triple-store graph 그리고 이와 관련된 delcarative/imperative query에 대해 알아보자.
+
+### Property Graphs
+
+property graph에서 vertex는 아래와 같이 구성된다.
+
+- 고유 식별자
+- 나가는 방향의 edge들
+- 들어오는 방향의 edge들
+- property들(key-value 형태)
+
+edge는 아래와 같이 구성된다.
+
+- 고유 식별자
+- edge가 시작하는 vertex(tail vertex)
+- edge가 도착하는 vertex(head vertex)
+- vertex간 관계를 나타내는 label
+- property들(key-value 형태)
+
+relational으로 생각하면 vertex들과 edge들이 들어가는 table 두 개를 생각해 볼 수 있다.  
+PostgreSQL 기준 schema를 표현하면 아래와 같다.
+
+Example 2-2
+
+```sql
+CREATE TABLE vertices (
+ vertex_id integer PRIMARY KEY,
+ properties json
+);
+CREATE TABLE edges (
+ edge_id integer PRIMARY KEY,
+ tail_vertex integer REFERENCES vertices (vertex_id),
+ head_vertex integer REFERENCES vertices (vertex_id),
+ label text,
+ properties json
+);
+CREATE INDEX edges_tails ON edges (tail_vertex);
+CREATE INDEX edges_heads ON edges (head_vertex);
+```
+
+이 model의 중요한 점들은 아래와 같다.
+
+- 어떤 vertex라도 다른 vertex와 관계를 가질 수 있기에 항상 edge를 가질 수 있다.
+- edge에는 head와 tail vertex에 대한 정보가 있기에 어디에서든 path를 따라 graph를 탐색할 수 있다.
+- 여러 다른 관계들을 나타내는 label들이 존재하기에 하나의 graph 내에서 다양한 정보들을 정보할 수 있다.
+
+이 model은 매우 유연한 특징을 가진다.  
+Fig 2-5에서 이를 잘 나타내는 대표적인 점은 각 국가마다 고유한 지역 체계를 잘 반영하여 표현할 수 있다는 점이다. 프랑스와 미국의 지역 체계에 맞춰 régions와 states로 다르게 표현한 것을 확인 가능하다.
+
+graph는 evolvability가 매우 좋아 추후 어떤 새로운 기능이 추가되어도 graph에서 이에 맞는 새로운 vertex와 기존 vertex와의 관계를 표현하는 edge를 추가하는 방식을 통해 쉽게 data를 반영할 수 있다.
+
+### The Cypher Query Language
+
+Cypher는 declarative한 language로 property graph에서 사용된다.
+Example 2-3에서는 Fig 2-5를 만들기 위한 Cypher query를 나타내며, vertex에는 USA나 Idaho와 같은 label이 붙어있고 edge는 ->를 통해 labeling하여 생성한다.
+
+Example 2-3.
+
+```
+CREATE
+ (NAmerica:Location {name:'North America', type:'continent'}),
+ (USA:Location {name:'United States', type:'country' }),
+ (Idaho:Location {name:'Idaho', type:'state' }),
+ (Lucy:Person {name:'Lucy' }),
+ (Idaho) -[:WITHIN]-> (USA) -[:WITHIN]-> (NAmerica),
+ (Lucy) -[:BORN_IN]-> (Idaho)
+```
+
+Example 2-4에서는 이렇게 생성된 graph에 대한 query를 나타내며, MATCH 문을 통해 주어진 조건에 맞는 pattern을 찾아낸다.
+
+```
+MATCH
+ (person) -[:BORN_IN]-> () -[:WITHIN*0..]-> (us:Location {name:'United States'}),
+ (person) -[:LIVES_IN]-> () -[:WITHIN*0..]-> (eu:Location {name:'Europe'})
+RETURN person.name
+```
+
+위 query는 다음과 같이 해석된다.
+
+1. person을 tail vertex로 BORN_IN label을 가진 edge와 연결된 어떤 head vertex 중 WITHIN edge를 통해 location이 United States인 vertex와 연결된 pattern을 찾는다.
+2. 같은 person tail vertex에서 LIVES_IN edge를 가진 head vertex 중 location이 Europe인 vertex와 연결된 pattern을 찾는다.
+
+declarative한 query이기에 이를 수행하는 방법은 여러가지가 있을 수 있다.  
+먼저 person vertex들을 전부 찾아 조건에 맞는 것들만 가져오거나 반대로 location에서 조건에 맞는 vertex를 찾아 거꾸로 person을 찾는 path를 따를 수도 있다.  
+즉, declarative하기에 query optimizer가 가장 최적의 방법으로 알아서 query를 수행할 수 있고 사용자는 이에 대해 자세히 알지 못해도 사용할 수 있게 되는 것이다.
+
+### Graph Queries in SQL
+
+Example 2-2와 같이 graph model을 relational model에서도 표현 가능하다.  
+즉, SQL을 통해 graph data에 대한 query 또한 사용할 수 있다는 뜻이다.  
+단, 어려운 점은 query를 수행하는데에 있어 JOIN 작업을 얼마나 수행해야 하는지 사전에 알지 못한다는 것이다.
+
+Fig 2-5에서 원하는 person과 location vertex pattern을 찾기 위해 중간에 얼마나 많은 edge를 거쳐야 하는지 모르기에 Cypher에서는 \\[:WITHIN*0..]을 통해 이를 나타내었다.  
+SQL에서는 이러한 variable-length traversal path를 query로 표현하기 위해 recursive common table expressions(WITH RECURSIVE syntax)를 활용할 수 있다.
+
+Example 2-5.
+
+```sql
+WITH RECURSIVE
+ -- in_usa is the set of vertex IDs of all locations within the United States
+ in_usa(vertex_id) AS (
+ SELECT vertex_id FROM vertices WHERE properties->>'name' = 'United States'
+ UNION
+ SELECT edges.tail_vertex FROM edges
+ JOIN in_usa ON edges.head_vertex = in_usa.vertex_id
+ WHERE edges.label = 'within'
+ ),
+
+ -- in_europe is the set of vertex IDs of all locations within Europe
+ in_europe(vertex_id) AS (
+ SELECT vertex_id FROM vertices WHERE properties->>'name' = 'Europe'
+ UNION
+ SELECT edges.tail_vertex FROM edges
+ JOIN in_europe ON edges.head_vertex = in_europe.vertex_id
+ WHERE edges.label = 'within'
+ ),
+
+ -- born_in_usa is the set of vertex IDs of all people born in the US
+ born_in_usa(vertex_id) AS (
+ SELECT edges.tail_vertex FROM edges
+ JOIN in_usa ON edges.head_vertex = in_usa.vertex_id
+ WHERE edges.label = 'born_in'
+ ),
+
+ -- lives_in_europe is the set of vertex IDs of all people living in Europe
+ lives_in_europe(vertex_id) AS (
+ SELECT edges.tail_vertex FROM edges
+ JOIN in_europe ON edges.head_vertex = in_europe.vertex_id
+ WHERE edges.label = 'lives_in'
+ )
+
+SELECT vertices.properties->>'name'
+FROM vertices
+-- join to find those people who were both born in the US *and* live in Europe
+JOIN born_in_usa ON vertices.vertex_id = born_in_usa.vertex_id
+JOIN lives_in_europe ON vertices.vertex_id = lives_in_europe.vertex_id;
+```
+
+위 SQL을 해석하면 아래와 같다.
+
+1. name 값이 United States들을 찾아 vertex집하에서 가장 첫번째 element로 만들고 이 vertex로 향하는 모든 within edge들이 찾아질 때까지 반복한다.
+2. name 값이 Europe인 vertex에 대해서도 1번 과정을 반복한다.
+3. 1번에서 찾은 vertex집합들을 향하는 born_in edge들을 전부 따라가 미국에서 **태어난** 사람들을 찾는다.
+4. 2번에서 찾은 vertex집합도 같은 방법을 통해 유럽에서 **사는** 사람들을 찾는다.
+5. 마지막으로 각 두 집합에서 찾은 vertex들 간 join을 수행하여 미국에서 태어나고 유럽에서 사는 사람들의 이름을 가져온다.
+
+graph query를 통해서는 4줄이지만 sql에서는 엄청 복잡하게 나타내어진다.
+따라서 이를 통해 다른 data model들은 각각 다른 use case들을 만족하기 위해 설계되었음을 직접 확인할 수 있다.
+
+### Triple-Stores and SPARQL
