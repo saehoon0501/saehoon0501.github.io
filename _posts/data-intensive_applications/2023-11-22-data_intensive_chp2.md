@@ -494,7 +494,7 @@ Rule 1,2 반복을 통해 within_recursive predicate은 db에 있는 North Ameri
 
 ![Desktop View](../../assets/data_intensive_apps/fig2-6.png)
 
-4. 마지막으로 Rule 3을 통해 어떤 location에서 BornIn 그리고 어떤 location에서 LivingIn한 사람들을 찾을 수 있다.  
+마지막으로 Rule 3을 통해 어떤 location에서 BornIn 그리고 어떤 location에서 LivingIn한 사람들을 찾을 수 있다.  
 BornIn = 'United States', LivingIn = 'Europe' 그리고 사람은 Who 변수로 설정하면 Datalog에서 Who 변수의 값을 알려준다.  
 
 ## Summary
