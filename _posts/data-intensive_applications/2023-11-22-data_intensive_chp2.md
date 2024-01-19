@@ -350,3 +350,165 @@ graph query를 통해서는 4줄이지만 sql에서는 엄청 복잡하게 나�
 따라서 이를 통해 다른 data model들은 각각 다른 use case들을 만족하기 위해 설계되었음을 직접 확인할 수 있다.
 
 ### Triple-Stores and SPARQL
+
+Property graph model과 유사하지만 Triple-Store와 관련된 다양한 기술과 도구들이 app을 개발할 때 유용할 수 있기에 알아본다.  
+
+모든 정보가 (Subject 주어,Predicate 서술어,Object 목적어)인 간단한 three-part statement로 저장된다.  
+- Subject는 graph에서 vertex와 동일하다.
+- Object는 primitive datatype 또는 vertex가 될 수 있다.
+primitive datatype의 경우 string 또는 숫자를 예로 생각해 볼 수 있고, 이 경우 subject와 key-value 관계를 가지게 된다. 따라서 (lucy, age, 33)인 경우 vertex lucy를 key 그리고 age:33을 value로 볼 수 있다.
+vertex인 경우, predicate는 graph의 edge가 되며, subject는 tail vertex 그리고 object는 head vertex이다. predicate을 통해 두 vertex간 관계를 설명하게 된다. 따라서 (lucy, marriedTo, alain)의 경우 vertex lucy,alain 사이에 marriedTo라는 edge로 관계를 나타내게 된다.
+
+Example 2-7.
+
+```
+@prefix: <urn:example:>.
+_:lucy a :Person; :name "Lucy"; :bornIn _:idaho.
+_:idaho a :Location; :name "idaho"; :type "state"; :within _:usa.
+_:usa a :Location; :name "United States"; :type: "country"; :withIn _:namerica.
+_:namerica a :Location; :name "North America"; :type "continent".
+```
+
+세미콜론(;)을 통해 같은 vertex에 대해서 여러 값들을 할당할 수 있다.  
+만약 predicate이 edge이면 object는 vertex이고 :bornIn _:idaho, :within _:usa와 같이 표현된다.  
+만약 property라면 object는 string이며, :name "United States"와 같이 표현된다.
+
+### The semantic web
+
+triple-store에 대해서 공부하다보면, semantic web과 관련된 정보들을 자주 볼 수 있을 것이며, triple-store와 semantic web은 서로 독립적이지만 많은 사람들이 이 둘이 밀접히 연관되어 있다고 생각하기 때문에 간략히 언급한다.  
+
+semantic web은 website에서 사람이 읽을 수 있는 정보 뿐아니라 일관성있는 format으로 기계가 이해할 수 있는 format의 data(Resource Description Framework) 또한 게시하여 "인터넷에 있는 web들을 db화 하자"에 대한 아이디어이다.  
+하지만 현재는 실제로 활용되고 있지는 않다.  
+
+### The RDF data model
+
+Example 2-7에서 사용한 언어는 human-readable RDF data이다. 때로는 RDF는 XML 형태로 작성될 수 있으며, 이 경우 같은 정보이지만 좀더 verbose하다.  
+
+Example 2-8. The data of Example 2-7, expressed using RDF/XML syntax
+
+```xml
+<rdf:RDF xmlns="urn:example:"
+xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<Location rdf:nodeID="idaho"> <name>Idaho</name> <type>state</type>
+<within>
+<Location rdf:nodeID="usa"> <name>United States</name> <type>country</type> <within>
+<Location rdf:nodeID="namerica"> <name>North America</name> <type>continent</type>
+          </Location>
+        </within>
+      </Location>
+    </within>
+</Location>
+<Person rdf:nodeID="lucy"> <name>Lucy</name>
+<bornIn rdf:nodeID="idaho"/>
+  </Person>
+</rdf:RDF>
+```
+
+semantic web을 위해 디자인되었기에 subject,predicate,object가 URI가 될 수 있다.  
+이는 나의 data와 다른 web에 있는 data를 결합 할 수 있게 하기 위함이며, URI를 통해 서로 다른 web에서 같은 predicate을 사용하더라도 충돌을 피할 수 있다.(namespace와 같이)  
+
+### The SPARQL query Language
+
+SPARQL은 RDF data model을 사용하는 tripe-store을 위한 declarative query 언어이며, Cypher와 유사하다.
+
+Example 2-9. The same qeury as Example 2-4, expressed in SPARQL
+
+```
+PREFIX : <urn:example>
+
+SELECT ?personName WHERE {
+  ?person :name ?personName.
+  ?person :bornIn / :within* / :name "United States".
+  ?person: livesIn / :within* / :name "Europe".
+}
+```
+
+아래에 있는 expression은 두 결과가 동일한 query문이다.
+
+(person) - [:BORN_IN]-> () -[:WITHIN*0..]-> (location) # Cypher
+?person :bornIn / :within* ?location. # SPARQL
+
+RDF에서는 predicate에서 vertex와 property를 구별하지 않기에 property matching을 위해 같은 syntax를 사용할 수 있다.   
+따라서 property name을 찾고 싶으면 아래와 같이 작성한다.  
+
+(usa {name:'United Staes'}) #cypher
+?usa :name "United States". #SPARQL
+
+semantic web은 사용되지 않지만 SPARQL은 app을 개발할 때 내부적으로 사용할 수 있는 강력한 도구가 될 수 있다.
+
+### The Foundaation: Datalog
+
+Datalog는 오래된 언어이지만 많은 query 언어들이 기반으로 삼았기에 중요하다.  
+Cascalog와 같이 Hadoop에서 많은 dataset들을 query할 때 사용하는 query 언어가 Datalog를 기반으로 구현되었다.  
+
+Datalog의 data model은 triple-store model과 유사하지만 좀더 일반화 되었다. triple-store처럼 (subject,predicate,object)로 작성하는 대신 predicate(subject,object)로 작성된다.  
+
+Example 2-10. Figure 2-5의 data를 Datalog로 표현
+
+```
+name(namerica, 'North America').
+type(namerica, continent).
+
+name(usa, 'United States').
+type(usa, country).
+within(usa, namerica).
+
+name(idaho, 'Idaho').
+type(idaho, state).
+within(idaho, usa).
+
+name(lucy, 'Lucy').
+born_in(lucy, idaho).
+```
+data를 정의하였으니, 전과 동일한 결과를 가지는 query문을 작성해보자.
+
+Example 2-11. Example 2-4와 동일한 query를 Datalog로 표현.
+
+```
+within_recursive(Location, Name) :- name(Location, Name). /* Rule 1 */
+
+within_recursive(Location, Name) :- within(Location, Via), /* Rule 2 */ 
+                                    within_recursive(Via, Name).
+
+migrated(Name, BornIn, LivingIn) :- name(Person, Name), /* Rule 3 */ 
+                                    born_in(Person, BornLoc),
+                                    within_recursive(BornLoc, BornIn),
+                                    lives_in(Person, LivingLoc),
+                                    within_recursive(LivingLoc, LivingIn).
+?- migrated(Who, 'United States', 'Europe'). 
+/* Who = 'Lucy'. */
+```
+
+Cypher와 SPARQL에서는 바로 SELECT문으로 넘어가지만 Datalog에서는 작은 단계를 차례로 거쳐 query를 진행한다.  
+Datalog에서는 Rule을 정의하고 매 단계 Rule의 결과를 차례로 이어나가 원하는 결과를 찾을 수 있는 것이다.
+
+Rule에서는 대문자는 변수를 predicate은 Cypher와 SPARQL와 동일하게 match된다. 예를 들면, name(Location, Name)은 Location namerica와 Name 'North America'를 찾아낸다.  
+Rule은 :- operator의 오른쪽에 위치한 모든 predicate에 적용되며, 적용될 때 :-의 왼쪽의 변수가 실제 value로 대체되어 db에 추가된 것과 같이 결과가 나온다.
+
+Example 2-11의 결과를 Rule을 통해서 알아보자.
+1. name(namerica, 'North America')는 db에 존재하기에 Rule 1이 적용되고 within_recurisve(namerica, 'North America')를 생성한다.
+2. within(usa, namerica)가 db에 존재하고 이전 단계에서 within_recurisve(namerica, 'North America')를 생성하였기에 Rule 2가 적용된다. 그리고 within_recursive(usa, 'North America')를 생성한다.
+3. within(idaho, usa)가 db에 존재하고 이전 단계에서 within_recursive(usa, 'North America')를 생성하였기에 Rule 2가 적용된다. 그리고 within_recursive(idaho, 'North America')가 생성된다.
+
+Rule 1,2 반복을 통해 within_recursive predicate은 db에 있는 North America의 모든 location들을 알려준다.  
+
+![Desktop View](../../assets/data_intensive_apps/fig2-6.png)
+
+4. 마지막으로 Rule 3을 통해 어떤 location에서 BornIn 그리고 어떤 location에서 LivingIn한 사람들을 찾을 수 있다.  
+BornIn = 'United States', LivingIn = 'Europe' 그리고 사람은 Who 변수로 설정하면 Datalog에서 Who 변수의 값을 알려준다.  
+
+## Summary
+
+이번 장에서는 다양한 model들에 대해서 알아 봤으며, 모든 것을 자세히 보지는 못했지만 overview를 통해 app의 요구사항에 따라 어떠한 best fit model을 찾을 지 알기에는 충분할 것이다.  
+
+역사적으로, data는 큰 hierarchical model을 나타내는 하나의 Tree로 표현되었지만, 다대다 관계를 표현하기에는 적절치 못하였고 따라서 relational model이 이를 해결하기 위해 개발되었다.  
+최근에는 개발자들이 relation model에 적합하지 않은 경우를 해결하기 위해 NoSQL을 datastore로 사용하고 있고 이러한 행보는 2가지로 큰 방향으로 구분해 볼 수 있다.  
+1. Document db는 data가 self-contained document들과 하나의 document가 다른 document와의 관계가 거의 없을 경우를 목적으로 한다.
+2. Graph db는 반대로 data가 잠재적으로 모든 것들과 관계를 가질 수 있을 경우를 목적으로 한다.
+
+document,realtional,graph이 세 가지 model들은 각자만의 도메인을 가진다. 하나의 model이 다른 model을 흉내낼 수 있지만 결과적으로 부족하다. 따라서 우리는 다른 목적들을 위한 다른 시스템을 가지는 것이며, 하나의 것이 모든 문제를 해결해주는 만능 열쇠가 될 수 없다.  
+
+document와 graph model이 가지는 공통점은 둘 다 저장되는 data에 대한 schema를 강제하지 않기에 요구사항을 바꿔도 app이 쉽게 적응할 수 있다는 점이다. 하지만 app 대부분은 data에 대한 명확한 structure을 예상하고 있기에 schema를 implict(read 시점에서 사용)하게 할지 explicit(write 시점에서 강제)할지에 대한 질문이 되게 될 것이다.
+
+각 data model은 저마다 query 언어와 framework가 존재하며, 지금까지 SQL, MapRedcue, MongoDB's aggregation pipeline, Cypher, SPARQL 그리고 Datalog에 대해 알아봤다.  
+다음 장에서는 설명되었던 data model을 구현할 때 발생하는 trade-off들에 대해 알아보자.
